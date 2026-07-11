@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rei dos Foldes</title>
+<style>
+:root{
+  --felt-1:#0b3d2e;
+  --felt-2:#0f5132;
+  --felt-3:#093a2b;
+  --gold:#e8c15a;
+  --gold-2:#f4d879;
+  --panel:#123f30;
+  --panel-2:#0d2f24;
+  --text:#f2ead5;
+  --text-dim:#b9c9bf;
+  --red:#c0344e;
+  --green-ok:#3fae6a;
+  --border:rgba(232,193,90,0.25);
+  --shadow:0 8px 24px rgba(0,0,0,0.45);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,0.04), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(0,0,0,0.35), transparent 50%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 6px),
+    linear-gradient(160deg, var(--felt-1), var(--felt-3) 70%);
+  color:var(--text);
+  font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  padding-bottom:40px;
+}
+header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:20px 24px 14px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(0,0,0,0.25), transparent);
+}
+.logo-badge{
+  width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, var(--gold-2), var(--gold) 55%, #a97e1e 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+  box-shadow:0 0 0 3px var(--panel-2), 0 4px 10px rgba(0,0,0,0.5);
+  flex-shrink:0;
+}
+header h1{
+  margin:0;
+  font-size:1.5rem;
+  letter-spacing:0.5px;
+  color:var(--gold-2);
+  text-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+header .sub{
+  margin:2px 0 0;
+  font-size:0.78rem;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.logo-note{
+  margin-left:auto;
+  font-size:0.7rem;
+  color:var(--text-dim);
+  opacity:0.7;
+  text-align:right;
+  max-width:160px;
+}
+nav.tabs{
+  display:flex;
+  gap:6px;
+  padding:14px 20px 0;
+  overflow-x:auto;
+}
+nav.tabs button{
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  padding:10px 18px;
+  border-radius:10px 10px 0 0;
+  font-size:0.88rem;
+  cursor:pointer;
+  white-space:nowrap;
+  font-weight:600;
+  letter-spacing:0.3px;
+  transition:all .15s;
+}
+nav.tabs button.active{
+  background:var(--panel);
+  color:var(--gold-2);
+  border-bottom:1px solid var(--panel);
+  box-shadow:0 -2px 10px rgba(0,0,0,0.25);
+}
+main{
+  padding:18px 20px 40px;
+  max-width:980px;
+  margin:0 auto;
+}
+.view{display:none;}
+.view.active{display:block;animation:fade .2s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+.card{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px 20px;
+  margin-bottom:18px;
+  box-shadow:var(--shadow);
+}
+.card h2{
+  margin:0 0 14px;
+  font-size:1rem;
+  color:var(--gold-2);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+}
+.card h2 .ico{font-size:1.1rem;}
+
+/* TIMER */
+.timer-wrap{text-align:center;padding:10px 0 4px;}
+.level-tag{
+  display:inline-block;
+  background:rgba(232,193,90,0.12);
+  border:1px solid var(--border);
+  color:var(--gold-2);
+  padding:4px 14px;
+  border-radius:20px;
+  font-size:0.8rem;
+  font-weight:700;
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+.clock{
+  font-size:clamp(3rem, 14vw, 5.5rem);
+  font-weight:800;
+  letter-spacing:2px;
+  font-variant-numeric:tabular-nums;
+  color:#fff;
+  text-shadow:0 0 30px rgba(232,193,90,0.25);
+  line-height:1;
+}
+.clock.warn{color:var(--gold-2);}
+.clock.danger{color:var(--red); animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}
+.blinds-row{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin:16px 0 6px;
+  flex-wrap:wrap;
+}
+.blind-box{
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 20px;
+  min-width:100px;
+}
+.blind-box .lbl{font-size:0.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;}
+.blind-box .val{font-size:1.5rem;font-weight:800;color:var(--gold-2);}
+.next-level{
+  margin-top:10px;
+  font-size:0.8rem;
+  color:var(--text-dim);
+}
+.next-level b{color:var(--text);}
+.timer-controls{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+button.btn{
+  border:none;
+  border-radius:10px;
+  padding:11px 20px;
+  font-size:0.88rem;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.3px;
+  transition:transform .1s, filter .15s;
+}
+button.btn:active{transform:scale(0.96);}
+.btn-primary{background:linear-gradient(160deg,var(--gold-2),var(--gold));color:#2a1f05;}
+.btn-secondary{background:var(--panel-2);color:var(--text);border:1px solid var(--border) !important;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-ghost{background:transparent;color:var(--gold-2);border:1px solid var(--border);}
+.btn-sm{padding:7px 12px;font-size:0.76rem;border-radius:8px;}
+button.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.inline-fields{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:4px;min-width:110px;}
+.field label{font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;}
+.field input, .field select{
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:9px 10px;
+  border-radius:8px;
+  font-size:0.9rem;
+  width:100%;
+}
+.field input:focus, .field select:focus{outline:1px solid var(--gold);}
+
+table.levels{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:6px;}
+table.levels th{
+  text-align:left;color:var(--text-dim);font-weight:600;font-size:0.7rem;
+  text-transform:uppercase;letter-spacing:0.5px;padding:6px 8px;border-bottom:1px solid var(--border);
+}
+table.levels td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.05);}
+table.levels tr.current-row{background:rgba(232,193,90,0.1);}
+table.levels input{
+  background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:5px 7px;width:64px;font-size:0.82rem;
+}
+table.levels .lvl-num{color:var(--gold-2);font-weight:700;}
+
+.checkline{display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-dim);margin-top:10px;}
+.checkline input{width:16px;height:16px;}
+
+/* CHIPS */
+.chip-dot{
+  width:18px;height:18px;border-radius:50%;
+  display:inline-block;border:2px solid rgba(255,255,255,0.5);
+  vertical-align:middle;margin-right:6px;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,0.25);
+}
+table.chips{width:100%;border-collapse:collapse;font-size:0.85rem;}
+table.chips th{
+  text-align:left;color:var(--text-dim);font-weight:600;font-size:0.7rem;
+  text-transform:uppercase;letter-spacing:0.5px;padding:6px 8px;border-bottom:1px solid var(--border);
+}
+table.chips td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;}
+table.chips input[type=text]{width:90px;}
+table.chips input[type=number]{width:70px;}
+table.chips input{
+  background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:5px 7px;font-size:0.82rem;
+}
+input[type=color]{width:36px;height:30px;padding:2px;border-radius:6px;border:1px solid var(--border);background:var(--panel-2);cursor:pointer;}
+
+.summary-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px;
+}
+.stat{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;
+}
+.stat .lbl{font-size:0.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;}
+.stat .val{font-size:1.4rem;font-weight:800;color:var(--gold-2);margin-top:2px;}
+.stat.ok .val{color:var(--green-ok);}
+.stat.bad .val{color:var(--red);}
+
+.breakdown-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px;
+}
+.breakdown-card{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;
+}
+.breakdown-card .title{font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;letter-spacing:0.5px;}
+.breakdown-card .line{display:flex;justify-content:space-between;font-size:0.85rem;padding:3px 0;}
+.breakdown-card .line b{color:var(--gold-2);}
+.breakdown-card .total{border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-weight:700;display:flex;justify-content:space-between;}
+
+/* PLAYERS */
+.player-form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.player-form input{flex:1;min-width:180px;}
+.player-list{display:flex;flex-direction:column;gap:8px;}
+.player-row{
+  display:flex;align-items:center;gap:10px;background:var(--panel-2);
+  border:1px solid var(--border);border-radius:12px;padding:10px 14px;flex-wrap:wrap;
+}
+.player-row.eliminated{opacity:0.55;}
+.player-rank{
+  width:30px;height:30px;border-radius:50%;background:rgba(232,193,90,0.15);
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--gold-2);
+  font-size:0.8rem;flex-shrink:0;
+}
+.player-rank.gold{background:var(--gold-2);color:#2a1f05;}
+.player-name{font-weight:700;flex:1;min-width:100px;}
+.player-meta{font-size:0.76rem;color:var(--text-dim);}
+.player-actions{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;}
+
+.podium{display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap;}
+.podium .place{
+  background:var(--panel-2);border:1px solid var(--gold);border-radius:12px;
+  padding:14px 18px;text-align:center;min-width:100px;
+}
+.podium .place .pos{font-size:1.6rem;}
+.podium .place .name{font-weight:700;margin-top:4px;}
+
+.empty-hint{color:var(--text-dim);font-size:0.85rem;font-style:italic;padding:6px 0;}
+
+footer{text-align:center;color:var(--text-dim);font-size:0.72rem;opacity:0.6;padding:20px;}
+
+@media(max-width:520px){
+  header h1{font-size:1.2rem;}
+  .logo-note{display:none;}
+  .clock{font-size:3.2rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">♣</div>
+  <div>
+    <h1>Rei dos Foldes</h1>
+    <div class="sub">Gerenciador de torneio de poker</div>
+  </div>
+  <div class="logo-note">espaço reservado pra logo — troque o "♣" pela logo depois</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-view="timer">⏱ Cronômetro</button>
+  <button class="tab-btn" data-view="chips">🪙 Fichas</button>
+  <button class="tab-btn" data-view="players">🏆 Jogadores</button>
+</nav>
+
+<main>
+
+  <!-- ===== TIMER VIEW ===== -->
+  <section id="view-timer" class="view active">
+    <div class="card">
+      <h2><span class="ico">⏱</span> Blinds</h2>
+      <div class="timer-wrap">
+        <div class="level-tag" id="levelTag">NÍVEL 1</div>
+        <div class="clock" id="clockDisplay">10:00</div>
+        <div class="blinds-row">
+          <div class="blind-box"><div class="lbl">Small Blind</div><div class="val" id="sbVal">25</div></div>
+          <div class="blind-box"><div class="lbl">Big Blind</div><div class="val" id="bbVal">50</div></div>
+          <div class="blind-box"><div class="lbl">Ante</div><div class="val" id="anteVal">0</div></div>
+        </div>
+        <div class="next-level" id="nextLevelInfo">Próximo: Nível 2 — 50/100</div>
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="btnStartPause">▶ Iniciar</button>
+          <button class="btn btn-secondary" id="btnPrevLevel">◀ Nível anterior</button>
+          <button class="btn btn-secondary" id="btnNextLevel">Próximo nível ▶</button>
+          <button class="btn btn-danger" id="btnResetTimer">↺ Reiniciar</button>
+        </div>
+        <div class="checkline">
+          <input type="checkbox" id="soundToggle" checked>
+          <label for="soundToggle">Tocar aviso sonoro ao trocar de nível</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🛠</span> Estrutura de níveis (edite os minutos e valores)</h2>
+      <div class="inline-fields">
+        <div class="field">
+          <label>Duração padrão p/ novo nível (min)</label>
+          <input type="number" id="defaultDuration" value="15" min="1">
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btnAddLevel">+ Adicionar nível</button>
+        <button class="btn btn-ghost btn-sm" id="btnGenLevels">Gerar estrutura padrão (10 níveis)</button>
+      </div>
+      <table class="levels">
+        <thead>
+          <tr><th>Nível</th><th>SB</th><th>BB</th><th>Ante</th><th>Min.</th><th></th></tr>
+        </thead>
+        <tbody id="levelsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== CHIPS VIEW ===== -->
+  <section id="view-chips" class="view">
+    <div class="card">
+      <h2><span class="ico">💰</span> Valores do torneio</h2>
+      <div class="inline-fields">
+        <div class="field">
+          <label>Valor do buy-in (R$)</label>
+          <input type="number" id="buyInValue" value="50" min="1">
+        </div>
+        <div class="field">
+          <label>Valor da recompra (R$)</label>
+          <input type="number" id="rebuyValue" value="50" min="1">
+        </div>
+        <div class="field">
+          <label>Nº de jogadores previstos</label>
+          <input type="number" id="numPlayersChips" value="8" min="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🪙</span> Fichas disponíveis (defina cor, valor e % da pilha inicial)</h2>
+      <table class="chips">
+        <thead>
+          <tr><th>Cor</th><th>Nome</th><th>Valor (R$)</th><th>% da pilha</th><th></th></tr>
+        </thead>
+        <tbody id="chipsBody"></tbody>
+      </table>
+      <div class="inline-fields" style="margin-top:12px;">
+        <button class="btn btn-secondary btn-sm" id="btnAddChip">+ Adicionar ficha</button>
+        <button class="btn btn-ghost btn-sm" id="btnCalcChips">Calcular divisão automática</button>
+      </div>
+      <div class="summary-grid" id="chipCheckGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">📦</span> Divisão automática por jogador</h2>
+      <div id="chipBreakdown"><p class="empty-hint">Clique em "Calcular divisão automática" acima.</p></div>
+      <div class="summary-grid" id="chipTotalsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===== PLAYERS VIEW ===== -->
+  <section id="view-players" class="view">
+    <div class="card">
+      <h2><span class="ico">➕</span> Adicionar jogador</h2>
+      <div class="player-form">
+        <input type="text" id="newPlayerName" placeholder="Nome do jogador">
+        <button class="btn btn-primary" id="btnAddPlayer">Adicionar (buy-in)</button>
+      </div>
+      <div class="summary-grid" id="playerStatsGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🎮</span> Jogadores ativos</h2>
+      <div class="player-list" id="activeList"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🏁</span> Ranking / eliminados</h2>
+      <div id="podiumWrap"></div>
+      <div class="player-list" id="eliminatedList" style="margin-top:12px;"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Rei dos Foldes — dados salvos automaticamente neste navegador</footer>
+
+<script>
+const STORAGE_KEY = 'rei-dos-foldes-state-v1';
+
+function defaultState(){
+  return {
+    timer:{
+      currentLevel:0,
+      remainingSeconds:15*60,
+      running:false,
+      soundOn:true,
+    },
+    levels: genDefaultLevels(),
+    chips:{
+      buyInValue:50,
+      rebuyValue:50,
+      numPlayers:8,
+      set:[
+        {color:'#ffffff', name:'Branca', value:1, pct:30},
+        {color:'#c0344e', name:'Vermelha', value:5, pct:30},
+        {color:'#3fae6a', name:'Verde', value:25, pct:25},
+        {color:'#1a1a1a', name:'Preta', value:100, pct:15},
+      ]
+    },
+    players: [],
+    nextPlayerId: 1,
+  };
+}
+
+function genDefaultLevels(){
+  // estrutura padrão progressiva comum em torneios caseiros
+  const base = [
+    [25,50,0],[50,100,0],[75,150,0],[100,200,25],[150,300,25],
+    [200,400,50],[300,600,75],[400,800,100],[500,1000,100],[700,1400,200]
+  ];
+  return base.map((b,i)=>({level:i+1, sb:b[0], bb:b[1], ante:b[2], minutes:15}));
+}
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return Object.assign(defaultState(), JSON.parse(raw));
+  }catch(e){}
+  return defaultState();
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// ---------- TABS ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+// ---------- TIMER ----------
+let tickHandle = null;
+let audioCtx = null;
+
+function beep(){
+  if(!state.timer.soundOn) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    for(let i=0;i<3;i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type='sine'; osc.frequency.value = 880;
+      const t = audioCtx.currentTime + i*0.35;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.3, t+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t+0.28);
+      osc.start(t); osc.stop(t+0.3);
+    }
+  }catch(e){}
+}
+
+function fmtClock(sec){
+  sec = Math.max(0,sec);
+  const m = Math.floor(sec/60);
+  const s = sec%60;
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+function renderTimer(){
+  const lv = state.levels[state.timer.currentLevel];
+  if(!lv) return;
+  document.getElementById('levelTag').textContent = 'NÍVEL '+lv.level;
+  document.getElementById('sbVal').textContent = lv.sb;
+  document.getElementById('bbVal').textContent = lv.bb;
+  document.getElementById('anteVal').textContent = lv.ante;
+  const clockEl = document.getElementById('clockDisplay');
+  clockEl.textContent = fmtClock(state.timer.remainingSeconds);
+  clockEl.className = 'clock' + (state.timer.remainingSeconds<=10?' danger':state.timer.remainingSeconds<=60?' warn':'');
+
+  const next = state.levels[state.timer.currentLevel+1];
+  document.getElementById('nextLevelInfo').innerHTML = next
+    ? `Próximo: Nível ${next.level} — <b>${next.sb}/${next.bb}</b>${next.ante?(' (ante '+next.ante+')'):''}`
+    : 'Último nível da estrutura';
+
+  document.getElementById('btnStartPause').textContent = state.timer.running ? '⏸ Pausar' : '▶ Iniciar';
+  document.getElementById('btnPrevLevel').disabled = state.timer.currentLevel<=0;
+  document.getElementById('btnNextLevel').disabled = state.timer.currentLevel>=state.levels.length-1;
+  document.getElementById('soundToggle').checked = state.timer.soundOn;
+
+  renderLevelsTable();
+}
+
+function renderLevelsTable(){
+  const body = document.getElementById('levelsBody');
+  body.innerHTML='';
+  state.levels.forEach((lv, idx)=>{
+    const tr = document.createElement('tr');
+    if(idx===state.timer.currentLevel) tr.className='current-row';
+    tr.innerHTML = `
+      <td class="lvl-num">${lv.level}</td>
+      <td><input type="number" data-field="sb" min="0" value="${lv.sb}"></td>
+      <td><input type="number" data-field="bb" min="0" value="${lv.bb}"></td>
+      <td><input type="number" data-field="ante" min="0" value="${lv.ante}"></td>
+      <td><input type="number" data-field="minutes" min="1" value="${lv.minutes}"></td>
+      <td><button class="btn btn-danger btn-sm" data-del="${idx}">✕</button></td>
+    `;
+    tr.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const field = inp.dataset.field;
+        let v = parseInt(inp.value,10)||0;
+        lv[field]=v;
+        if(field==='minutes' && idx===state.timer.currentLevel && !state.timer.running){
+          state.timer.remainingSeconds = v*60;
+        }
+        saveState();
+        renderTimer();
+      });
+    });
+    tr.querySelector('[data-del]').addEventListener('click', ()=>{
+      state.levels.splice(idx,1);
+      state.levels.forEach((l,i)=>l.level=i+1);
+      if(state.timer.currentLevel>=state.levels.length) state.timer.currentLevel = Math.max(0,state.levels.length-1);
+      saveState();
+      renderTimer();
+    });
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('btnAddLevel').addEventListener('click', ()=>{
+  const dur = parseInt(document.getElementById('defaultDuration').value,10)||15;
+  const last = state.levels[state.levels.length-1];
+  const sb = last ? last.bb : 25;
+  const bb = sb*2;
+  state.levels.push({level: state.levels.length+1, sb, bb, ante: last?last.ante:0, minutes:dur});
+  saveState(); renderTimer();
+});
+
+document.getElementById('btnGenLevels').addEventListener('click', ()=>{
+  if(!confirm('Isso substitui a estrutura de níveis atual pela padrão. Continuar?')) return;
+  const dur = parseInt(document.getElementById('defaultDuration').value,10)||15;
+  state.levels = genDefaultLevels().map(l=>({...l, minutes:dur}));
+  state.timer.currentLevel=0;
+  state.timer.remainingSeconds = dur*60;
+  state.timer.running=false;
+  saveState(); renderTimer();
+});
+
+document.getElementById('btnStartPause').addEventListener('click', ()=>{
+  state.timer.running = !state.timer.running;
+  saveState();
+  renderTimer();
+});
+
+document.getElementById('btnResetTimer').addEventListener('click', ()=>{
+  if(!confirm('Reiniciar cronômetro para o nível 1?')) return;
+  state.timer.currentLevel=0;
+  state.timer.running=false;
+  state.timer.remainingSeconds = (state.levels[0]?state.levels[0].minutes:15)*60;
+  saveState(); renderTimer();
+});
+
+document.getElementById('btnNextLevel').addEventListener('click', ()=>advanceLevel(1));
+document.getElementById('btnPrevLevel').addEventListener('click', ()=>advanceLevel(-1));
+
+function advanceLevel(dir){
+  const newIdx = state.timer.currentLevel + dir;
+  if(newIdx<0 || newIdx>=state.levels.length) return;
+  state.timer.currentLevel = newIdx;
+  state.timer.remainingSeconds = state.levels[newIdx].minutes*60;
+  saveState();
+  renderTimer();
+}
+
+document.getElementById('soundToggle').addEventListener('change', (e)=>{
+  state.timer.soundOn = e.target.checked;
+  saveState();
+});
+
+function timerTick(){
+  if(state.timer.running){
+    state.timer.remainingSeconds--;
+    if(state.timer.remainingSeconds<=0){
+      if(state.timer.currentLevel < state.levels.length-1){
+        state.timer.currentLevel++;
+        state.timer.remainingSeconds = state.levels[state.timer.currentLevel].minutes*60;
+        beep();
+      } else {
+        state.timer.remainingSeconds = 0;
+        state.timer.running=false;
+        beep();
+      }
+    }
+    saveState();
+    renderTimer();
+  }
+}
+setInterval(timerTick, 1000);
+
+// ---------- CHIPS ----------
+function renderChipsConfig(){
+  document.getElementById('buyInValue').value = state.chips.buyInValue;
+  document.getElementById('rebuyValue').value = state.chips.rebuyValue;
+  document.getElementById('numPlayersChips').value = state.chips.numPlayers;
+
+  const body = document.getElementById('chipsBody');
+  body.innerHTML='';
+  state.chips.set.forEach((c, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="color" data-field="color" value="${c.color}"></td>
+      <td><input type="text" data-field="name" value="${c.name}"></td>
+      <td><input type="number" data-field="value" min="1" value="${c.value}"></td>
+      <td><input type="number" data-field="pct" min="0" max="100" value="${c.pct}"></td>
+      <td><button class="btn btn-danger btn-sm" data-del="${idx}">✕</button></td>
+    `;
+    tr.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const f = inp.dataset.field;
+        c[f] = (f==='name'||f==='color') ? inp.value : (parseFloat(inp.value)||0);
+        saveState();
+        renderChipCheck();
+      });
+    });
+    tr.querySelector('[data-del]').addEventListener('click', ()=>{
+      state.chips.set.splice(idx,1);
+      saveState(); renderChipsConfig(); renderChipCheck();
+    });
+    body.appendChild(tr);
+  });
+  renderChipCheck();
+}
+
+function renderChipCheck(){
+  const totalPct = state.chips.set.reduce((s,c)=>s+c.pct,0);
+  const grid = document.getElementById('chipCheckGrid');
+  grid.innerHTML = `
+    <div class="stat ${Math.abs(totalPct-100)<0.5?'ok':'bad'}">
+      <div class="lbl">Soma das %</div><div class="val">${totalPct}%</div>
+    </div>
+    <div class="stat"><div class="lbl">Buy-in configurado</div><div class="val">R$ ${state.chips.buyInValue}</div></div>
+    <div class="stat"><div class="lbl">Tipos de ficha</div><div class="val">${state.chips.set.length}</div></div>
+  `;
+}
+
+document.getElementById('buyInValue').addEventListener('change', e=>{
+  state.chips.buyInValue = parseFloat(e.target.value)||0;
+  saveState(); renderChipCheck(); renderPlayerStats();
+});
+document.getElementById('rebuyValue').addEventListener('change', e=>{
+  state.chips.rebuyValue = parseFloat(e.target.value)||0;
+  saveState(); renderPlayerStats();
+});
+document.getElementById('numPlayersChips').addEventListener('change', e=>{
+  state.chips.numPlayers = parseInt(e.target.value,10)||1;
+  saveState();
+});
+
+document.getElementById('btnAddChip').addEventListener('click', ()=>{
+  state.chips.set.push({color:'#888888', name:'Nova', value:10, pct:0});
+  saveState(); renderChipsConfig();
+});
+
+document.getElementById('btnCalcChips').addEventListener('click', calcChipDivision);
+
+function calcChipDivision(){
+  const buyIn = state.chips.buyInValue;
+  const denoms = [...state.chips.set].sort((a,b)=>a.value-b.value);
+  if(denoms.length===0 || buyIn<=0){
+    document.getElementById('chipBreakdown').innerHTML = '<p class="empty-hint">Configure ao menos uma ficha e um buy-in válido.</p>';
+    return;
+  }
+  // aloca valor por % e converte em qtd de fichas (arredondando)
+  let qty = denoms.map(d=>{
+    const targetValue = buyIn * (d.pct/100);
+    return Math.round(targetValue / d.value);
+  });
+  let sumValue = qty.reduce((s,q,i)=>s+q*denoms[i].value,0);
+  let diff = Math.round((buyIn - sumValue));
+
+  // ajusta a diferença usando a menor ficha disponível (para fechar o valor exato)
+  if(diff!==0){
+    const smallestIdx = 0;
+    const smallestVal = denoms[smallestIdx].value;
+    if(smallestVal>0){
+      const adjust = Math.round(diff/smallestVal);
+      qty[smallestIdx] = Math.max(0, qty[smallestIdx] + adjust);
+      sumValue = qty.reduce((s,q,i)=>s+q*denoms[i].value,0);
+      diff = Math.round((buyIn - sumValue));
+    }
+  }
+
+  const totalChips = qty.reduce((s,q)=>s+q,0);
+  const players = state.chips.numPlayers || 1;
+
+  const breakdownEl = document.getElementById('chipBreakdown');
+  let rows = denoms.map((d,i)=>`
+    <div class="line">
+      <span><span class="chip-dot" style="background:${d.color}"></span>${d.name} (R$ ${d.value})</span>
+      <b>${qty[i]}x</b>
+    </div>`).join('');
+  breakdownEl.innerHTML = `
+    <div class="breakdown-grid">
+      <div class="breakdown-card">
+        <div class="title">Por jogador (${totalChips} fichas)</div>
+        ${rows}
+        <div class="total"><span>Valor da pilha</span><span>R$ ${sumValue}${diff!==0?` (dif. R$ ${diff})`:''}</span></div>
+      </div>
+      <div class="breakdown-card">
+        <div class="title">Total da mesa (${players} jogadores)</div>
+        ${denoms.map((d,i)=>`
+          <div class="line">
+            <span><span class="chip-dot" style="background:${d.color}"></span>${d.name}</span>
+            <b>${qty[i]*players}x</b>
+          </div>`).join('')}
+        <div class="total"><span>Valor total em jogo</span><span>R$ ${sumValue*players}</span></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('chipTotalsGrid').innerHTML = `
+    <div class="stat"><div class="lbl">Fichas por jogador</div><div class="val">${totalChips}</div></div>
+    <div class="stat ${diff===0?'ok':'bad'}"><div class="lbl">Diferença p/ buy-in</div><div class="val">R$ ${diff}</div></div>
+    <div class="stat"><div class="lbl">Total de fichas na mesa</div><div class="val">${totalChips*players}</div></div>
+  `;
+}
+
+// ---------- PLAYERS ----------
+function renderPlayers(){
+  const active = state.players.filter(p=>!p.eliminated);
+  const eliminated = state.players.filter(p=>p.eliminated).sort((a,b)=>a.rank-b.rank);
+
+  const activeList = document.getElementById('activeList');
+  activeList.innerHTML = active.length ? '' : '<p class="empty-hint">Nenhum jogador ativo. Adicione jogadores acima.</p>';
+  active.forEach(p=>{
+    const row = document.createElement('div');
+    row.className='player-row';
+    row.innerHTML = `
+      <div class="player-rank">${p.rebuys>0?'♻':'●'}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-meta">Recompras: ${p.rebuys} · Investido: R$ ${playerInvested(p)}</div>
+      <div class="player-actions">
+        <button class="btn btn-secondary btn-sm" data-rebuy="${p.id}">+ Recompra</button>
+        <button class="btn btn-danger btn-sm" data-elim="${p.id}">Eliminar</button>
+        <button class="btn btn-ghost btn-sm" data-remove="${p.id}">Remover</button>
+      </div>
+    `;
+    activeList.appendChild(row);
+  });
+
+  const elimList = document.getElementById('eliminatedList');
+  elimList.innerHTML='';
+  eliminated.forEach(p=>{
+    const row = document.createElement('div');
+    row.className='player-row eliminated';
+    row.innerHTML = `
+      <div class="player-rank ${p.rank===1?'gold':''}">${p.rank}º</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-meta">Recompras: ${p.rebuys} · Investido: R$ ${playerInvested(p)}</div>
+      <div class="player-actions">
+        <button class="btn btn-ghost btn-sm" data-reactivate="${p.id}">Reativar</button>
+        <button class="btn btn-ghost btn-sm" data-remove="${p.id}">Remover</button>
+      </div>
+    `;
+    elimList.appendChild(row);
+  });
+
+  activeList.querySelectorAll('[data-rebuy]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = state.players.find(pl=>pl.id==b.dataset.rebuy);
+    p.rebuys++;
+    saveState(); renderPlayers(); renderPlayerStats();
+  }));
+  activeList.querySelectorAll('[data-elim]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = state.players.find(pl=>pl.id==b.dataset.elim);
+    const stillActive = state.players.filter(pl=>!pl.eliminated).length;
+    if(!confirm(`Eliminar ${p.name}? Ele ficará em ${stillActive}º lugar.`)) return;
+    p.eliminated = true;
+    p.rank = stillActive;
+    saveState(); renderPlayers(); renderPlayerStats();
+  }));
+  [...activeList.querySelectorAll('[data-remove]'), ...elimList.querySelectorAll('[data-remove]')].forEach(b=>b.addEventListener('click', ()=>{
+    if(!confirm('Remover jogador permanentemente?')) return;
+    state.players = state.players.filter(pl=>pl.id!=b.dataset.remove);
+    saveState(); renderPlayers(); renderPlayerStats();
+  }));
+  elimList.querySelectorAll('[data-reactivate]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = state.players.find(pl=>pl.id==b.dataset.reactivate);
+    p.eliminated=false; p.rank=null;
+    saveState(); renderPlayers(); renderPlayerStats();
+  }));
+
+  // podio
+  const podium = document.getElementById('podiumWrap');
+  const finished = active.length<=1 && state.players.length>1;
+  if(finished){
+    const champion = active[0] || eliminated.find(p=>p.rank===1);
+    const top3 = eliminated.filter(p=>p.rank<=3).sort((a,b)=>a.rank-b.rank);
+    let list = champion ? [{rank:1,name:champion.name}, ...top3.filter(p=>p.rank!==1)] : top3;
+    list.sort((a,b)=>a.rank-b.rank);
+    podium.innerHTML = `<div class="podium">${list.map(p=>`
+      <div class="place"><div class="pos">${p.rank===1?'🥇':p.rank===2?'🥈':p.rank===3?'🥉':p.rank+'º'}</div><div class="name">${p.name}</div></div>
+    `).join('')}</div>`;
+  } else {
+    podium.innerHTML='';
+  }
+}
+
+function playerInvested(p){
+  return (1+p.rebuys>=1 ? state.chips.buyInValue : 0) + p.rebuys*state.chips.rebuyValue;
+}
+
+function renderPlayerStats(){
+  const totalPlayers = state.players.length;
+  const totalRebuys = state.players.reduce((s,p)=>s+p.rebuys,0);
+  const totalCollected = state.players.reduce((s,p)=>s+playerInvested(p),0);
+  const activeCount = state.players.filter(p=>!p.eliminated).length;
+  document.getElementById('playerStatsGrid').innerHTML = `
+    <div class="stat"><div class="lbl">Jogadores</div><div class="val">${totalPlayers}</div></div>
+    <div class="stat"><div class="lbl">Ativos</div><div class="val">${activeCount}</div></div>
+    <div class="stat"><div class="lbl">Recompras</div><div class="val">${totalRebuys}</div></div>
+    <div class="stat ok"><div class="lbl">Total arrecadado</div><div class="val">R$ ${totalCollected}</div></div>
+  `;
+}
+
+document.getElementById('btnAddPlayer').addEventListener('click', addPlayer);
+document.getElementById('newPlayerName').addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
+
+function addPlayer(){
+  const input = document.getElementById('newPlayerName');
+  const name = input.value.trim();
+  if(!name) return;
+  state.players.push({id: state.nextPlayerId++, name, rebuys:0, eliminated:false, rank:null});
+  input.value='';
+  saveState(); renderPlayers(); renderPlayerStats();
+}
+
+// ---------- INIT ----------
+function init(){
+  renderTimer();
+  renderChipsConfig();
+  renderPlayers();
+  renderPlayerStats();
+}
+init();
+</script>
+</body>
+</html>
